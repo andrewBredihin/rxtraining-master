@@ -6,15 +6,11 @@ import org.mockito.Mockito;
 
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
-import ru.artkorchagin.rxtraining.exceptions.ExpectedException;
 
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.reset;
 
 /**
@@ -24,19 +20,14 @@ import static org.mockito.Mockito.reset;
 public class RxMaybeTrainingTest {
 
 
-    private RxMaybeTraining mRxMaybeTraining = Mockito.spy(new RxMaybeTraining());
+    private final RxMaybeTraining mRxMaybeTraining = Mockito.spy(new RxMaybeTraining());
     private TestScheduler mTestScheduler;
 
     @Before
     public void setUp() {
         reset(mRxMaybeTraining);
         mTestScheduler = new TestScheduler();
-        RxJavaPlugins.setComputationSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) {
-                return mTestScheduler;
-            }
-        });
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> mTestScheduler);
     }
 
     @Test
@@ -97,7 +88,7 @@ public class RxMaybeTrainingTest {
     @Test
     public void calculateSumOfValues_noValues() {
         TestObserver<Integer> testObserver = mRxMaybeTraining
-                .calculateSumOfValues(Observable.<Integer>empty())
+                .calculateSumOfValues(Observable.empty())
                 .test();
 
         testObserver.assertNoValues();
@@ -119,7 +110,7 @@ public class RxMaybeTrainingTest {
     @Test
     public void leastOneElement_noValues() {
         TestObserver<Integer> testObserver = mRxMaybeTraining
-                .leastOneElement(Maybe.<Integer>empty(), 2)
+                .leastOneElement(Maybe.empty(), 2)
                 .test();
 
         testObserver.assertValues(2);
