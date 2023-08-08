@@ -5,8 +5,6 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
@@ -20,19 +18,14 @@ import static org.mockito.Mockito.reset;
  */
 public class RxErrorsTrainingTest {
 
-    private RxErrorsTraining mRxCreatingTraining = Mockito.spy(new RxErrorsTraining());
+    private final RxErrorsTraining mRxCreatingTraining = Mockito.spy(new RxErrorsTraining());
     private TestScheduler mTestScheduler;
 
     @Before
     public void setUp() {
         reset(mRxCreatingTraining);
         mTestScheduler = new TestScheduler();
-        RxJavaPlugins.setComputationSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) {
-                return mTestScheduler;
-            }
-        });
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> mTestScheduler);
     }
 
     @Test
@@ -50,7 +43,7 @@ public class RxErrorsTrainingTest {
 
         Observable<Integer> errorObservable = Observable.concat(
                 Observable.fromArray(1, 2, 3),
-                Observable.<Integer>error(new ExpectedException()));
+                Observable.error(new ExpectedException()));
 
         TestObserver<Integer> testObserver = mRxCreatingTraining
                 .handleErrorsWithDefaultValue(errorObservable, 4)
@@ -74,7 +67,7 @@ public class RxErrorsTrainingTest {
     public void handleErrorsWithFallbackObservable_withError() {
         Observable<Integer> errorObservable = Observable.concat(
                 Observable.fromArray(1, 2, 3),
-                Observable.<Integer>error(new ExpectedException()));
+                Observable.error(new ExpectedException()));
         TestObserver<Integer> testObserver = mRxCreatingTraining
                 .handleErrorsWithFallbackObservable(errorObservable, Observable.fromArray(4))
                 .test();
