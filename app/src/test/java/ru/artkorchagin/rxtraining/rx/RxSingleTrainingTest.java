@@ -24,7 +24,7 @@ import static org.mockito.Mockito.reset;
  */
 public class RxSingleTrainingTest {
 
-    private RxSingleTraining mRxSingleTraining = Mockito.spy(new RxSingleTraining());
+    private final RxSingleTraining mRxSingleTraining = Mockito.spy(new RxSingleTraining());
     private TestScheduler mTestScheduler;
 
     @Before
