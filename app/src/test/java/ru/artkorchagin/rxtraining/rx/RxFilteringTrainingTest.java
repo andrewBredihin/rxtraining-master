@@ -8,10 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Scheduler;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
@@ -24,19 +20,14 @@ import static org.mockito.Mockito.reset;
  */
 public class RxFilteringTrainingTest {
 
-    private RxFilteringTraining mRxFilteringTraining = Mockito.spy(new RxFilteringTraining());
+    private final RxFilteringTraining mRxFilteringTraining = Mockito.spy(new RxFilteringTraining());
     private TestScheduler mTestScheduler;
 
     @Before
     public void setUp() {
         reset(mRxFilteringTraining);
         mTestScheduler = new TestScheduler();
-        RxJavaPlugins.setComputationSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) {
-                return mTestScheduler;
-            }
-        });
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> mTestScheduler);
     }
 
     @Test
@@ -59,7 +50,6 @@ public class RxFilteringTrainingTest {
         testObserver.assertNoErrors();
         testObserver.assertComplete();
         testObserver.assertValues(1, 2, 3, 4, 5);
-
     }
 
     @Test
@@ -121,22 +111,19 @@ public class RxFilteringTrainingTest {
     public void onlyLastPerInterval() {
         final int periodMills = 500;
         TestObserver<Integer> testObserver = mRxFilteringTraining
-                .onlyLastPerInterval(periodMills, Observable.create(new ObservableOnSubscribe<Integer>() {
-                    @Override
-                    public void subscribe(ObservableEmitter<Integer> emitter) {
-                        emitter.onNext(1);
-                        mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
-                        emitter.onNext(2);
-                        emitter.onNext(3);
-                        emitter.onNext(4);
-                        mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
-                        emitter.onNext(5);
-                        mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
-                        mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
-                        emitter.onNext(6);
-                        emitter.onNext(7);
-                        emitter.onComplete();
-                    }
+                .onlyLastPerInterval(periodMills, Observable.create(emitter -> {
+                    emitter.onNext(1);
+                    mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
+                    emitter.onNext(2);
+                    emitter.onNext(3);
+                    emitter.onNext(4);
+                    mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
+                    emitter.onNext(5);
+                    mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
+                    mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
+                    emitter.onNext(6);
+                    emitter.onNext(7);
+                    emitter.onComplete();
                 }))
                 .test();
 
@@ -149,21 +136,18 @@ public class RxFilteringTrainingTest {
     public void errorIfLongWait_withoutError() {
         final int periodMills = 500;
         TestObserver<Integer> testObserver = mRxFilteringTraining
-                .errorIfLongWait(periodMills, Observable.create(new ObservableOnSubscribe<Integer>() {
-                    @Override
-                    public void subscribe(ObservableEmitter<Integer> emitter) {
-                        emitter.onNext(1);
-                        mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
-                        emitter.onNext(2);
-                        emitter.onNext(3);
-                        emitter.onNext(4);
-                        mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
-                        emitter.onNext(5);
-                        mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
-                        emitter.onNext(6);
-                        emitter.onNext(7);
-                        emitter.onComplete();
-                    }
+                .errorIfLongWait(periodMills, Observable.create(emitter -> {
+                    emitter.onNext(1);
+                    mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
+                    emitter.onNext(2);
+                    emitter.onNext(3);
+                    emitter.onNext(4);
+                    mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
+                    emitter.onNext(5);
+                    mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
+                    emitter.onNext(6);
+                    emitter.onNext(7);
+                    emitter.onComplete();
                 }))
                 .test();
 
@@ -176,21 +160,18 @@ public class RxFilteringTrainingTest {
     public void errorIfLongWait_withError() {
         final int periodMills = 500;
         TestObserver<Integer> testObserver = mRxFilteringTraining
-                .errorIfLongWait(periodMills, Observable.create(new ObservableOnSubscribe<Integer>() {
-                    @Override
-                    public void subscribe(ObservableEmitter<Integer> emitter) {
-                        emitter.onNext(1);
-                        mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
-                        emitter.onNext(2);
-                        emitter.onNext(3);
-                        emitter.onNext(4);
-                        mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
-                        emitter.onNext(5);
-                        mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
-                        emitter.onNext(6);
-                        emitter.onNext(7);
-                        emitter.onComplete();
-                    }
+                .errorIfLongWait(periodMills, Observable.create(emitter -> {
+                    emitter.onNext(1);
+                    mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
+                    emitter.onNext(2);
+                    emitter.onNext(3);
+                    emitter.onNext(4);
+                    mTestScheduler.advanceTimeBy(periodMills - 1, TimeUnit.MILLISECONDS);
+                    emitter.onNext(5);
+                    mTestScheduler.advanceTimeBy(periodMills, TimeUnit.MILLISECONDS);
+                    emitter.onNext(6);
+                    emitter.onNext(7);
+                    emitter.onComplete();
                 }))
                 .test();
 
