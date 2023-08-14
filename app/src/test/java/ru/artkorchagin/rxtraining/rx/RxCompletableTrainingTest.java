@@ -4,11 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.NoSuchElementException;
-
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
@@ -23,19 +19,14 @@ import static org.mockito.Mockito.verify;
  */
 public class RxCompletableTrainingTest {
 
-    private RxCompletableTraining mRxCompletableTraining = Mockito.spy(new RxCompletableTraining());
+    private final RxCompletableTraining mRxCompletableTraining = Mockito.spy(new RxCompletableTraining());
     private TestScheduler mTestScheduler;
 
     @Before
     public void setUp() {
         reset(mRxCompletableTraining);
         mTestScheduler = new TestScheduler();
-        RxJavaPlugins.setComputationSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) {
-                return mTestScheduler;
-            }
-        });
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> mTestScheduler);
     }
 
     @Test

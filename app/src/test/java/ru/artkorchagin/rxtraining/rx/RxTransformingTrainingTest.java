@@ -25,7 +25,7 @@ import static org.mockito.Mockito.reset;
  */
 public class RxTransformingTrainingTest {
 
-    private RxTransformingTraining mRxTransformingTraining = Mockito.spy(new RxTransformingTraining());
+    private final RxTransformingTraining mRxTransformingTraining = Mockito.spy(new RxTransformingTraining());
 
     @Before
     public void setUp() {
@@ -72,20 +72,10 @@ public class RxTransformingTrainingTest {
 
         TestObserver<Pair<Character, List<String>>> testObservable = mRxTransformingTraining
                 .distributeNamesByFirstLetter(Observable.fromArray(testNamesValues))
-                .flatMap(new Function<GroupedObservable<Character, String>, ObservableSource<Pair<Character, List<String>>>>() {
-                    @Override
-                    public ObservableSource<Pair<Character, List<String>>> apply(final GroupedObservable<Character, String> characterStringGroupedObservable) {
-                        return characterStringGroupedObservable
-                                .toList()
-                                .map(new Function<List<String>, Pair<Character, List<String>>>() {
-                                    @Override
-                                    public Pair<Character, List<String>> apply(List<String> strings) {
-                                        return Pair.create(characterStringGroupedObservable.getKey(), strings);
-                                    }
-                                })
-                                .toObservable();
-                    }
-                })
+                .flatMap((Function<GroupedObservable<Character, String>, ObservableSource<Pair<Character, List<String>>>>) characterStringGroupedObservable -> characterStringGroupedObservable
+                        .toList()
+                        .map(strings -> Pair.create(characterStringGroupedObservable.getKey(), strings))
+                        .toObservable())
                 .test();
 
         testObservable.assertComplete();
@@ -110,5 +100,4 @@ public class RxTransformingTrainingTest {
         testObservable.assertNoErrors();
         testObservable.assertValueSequence(resultIntsValues);
     }
-
 }

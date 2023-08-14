@@ -4,13 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.NoSuchElementException;
-
 import io.reactivex.Observable;
-import io.reactivex.Scheduler;
-import io.reactivex.functions.Function;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.plugins.RxJavaPlugins;
 import io.reactivex.schedulers.TestScheduler;
@@ -18,25 +12,24 @@ import ru.artkorchagin.rxtraining.exceptions.ExpectedException;
 
 import static org.mockito.Mockito.reset;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.NoSuchElementException;
+
 /**
  * @author Arthur Korchagin (artur.korchagin@simbirsoft.com)
  * @since 20.11.18
  */
 public class RxSingleTrainingTest {
 
-    private RxSingleTraining mRxSingleTraining = Mockito.spy(new RxSingleTraining());
+    private final RxSingleTraining mRxSingleTraining = Mockito.spy(new RxSingleTraining());
     private TestScheduler mTestScheduler;
 
     @Before
     public void setUp() {
         reset(mRxSingleTraining);
         mTestScheduler = new TestScheduler();
-        RxJavaPlugins.setComputationSchedulerHandler(new Function<Scheduler, Scheduler>() {
-            @Override
-            public Scheduler apply(Scheduler scheduler) {
-                return mTestScheduler;
-            }
-        });
+        RxJavaPlugins.setComputationSchedulerHandler(scheduler -> mTestScheduler);
     }
 
     @Test
@@ -74,7 +67,7 @@ public class RxSingleTrainingTest {
     @Test
     public void onlyOneElementOfSequence_error() {
         TestObserver<Integer> testObserver = mRxSingleTraining
-                .onlyOneElementOfSequence(Observable.<Integer>empty())
+                .onlyOneElementOfSequence(Observable.empty())
                 .test();
 
         testObserver.assertNoValues();

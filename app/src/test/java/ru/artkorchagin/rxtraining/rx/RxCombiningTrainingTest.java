@@ -45,9 +45,9 @@ public class RxCombiningTrainingTest {
     @Test
     public void summation() {
         TestObserver<Integer> testObserver = mRxCombiningTraining.summation(
-                Observable.fromArray(1, 2, 3, 4, 5),
-                Observable.fromArray(10, 20, 30, 40, 50)
-        )
+                        Observable.fromArray(1, 2, 3, 4, 5),
+                        Observable.fromArray(10, 20, 30, 40, 50)
+                )
                 .test();
 
         testObserver.assertNoErrors();
@@ -63,23 +63,23 @@ public class RxCombiningTrainingTest {
         final Integer[] selectedCategories = {1, 2, 3, 4, 5};
 
         TestObserver<List<String>> testObserver = mRxCombiningTraining.requestItems(
-                Observable.interval(period, period * 2, unit)
-                        .take(searchStrings.length)
-                        .map(new Function<Long, String>() {
-                            @Override
-                            public String apply(Long aLong) {
-                                return searchStrings[aLong.intValue()];
-                            }
-                        }),
-                Observable.interval(0, period * 2, unit)
-                        .take(selectedCategories.length)
-                        .map(new Function<Long, Integer>() {
-                            @Override
-                            public Integer apply(Long aLong) {
-                                return selectedCategories[aLong.intValue()];
-                            }
-                        })
-        )
+                        Observable.interval(period, period * 2, unit)
+                                .take(searchStrings.length)
+                                .map(new Function<Long, String>() {
+                                    @Override
+                                    public String apply(Long aLong) {
+                                        return searchStrings[aLong.intValue()];
+                                    }
+                                }),
+                        Observable.interval(0, period * 2, unit)
+                                .take(selectedCategories.length)
+                                .map(new Function<Long, Integer>() {
+                                    @Override
+                                    public Integer apply(Long aLong) {
+                                        return selectedCategories[aLong.intValue()];
+                                    }
+                                })
+                )
                 .test();
 
         mTestScheduler.advanceTimeBy(period, unit);
@@ -129,22 +129,22 @@ public class RxCombiningTrainingTest {
     @Test
     public void composition() {
         TestObserver<Integer> testObserver = mRxCombiningTraining.composition(
-                Observable.interval(0, 2, TimeUnit.MINUTES)
-                        .take(3)
-                        .map(new Function<Long, Integer>() {
-                            @Override
-                            public Integer apply(Long aLong) {
-                                return aLong.intValue() * 2;
-                            }
-                        }),
-                Observable.interval(1, 2, TimeUnit.MINUTES)
-                        .take(3)
-                        .map(new Function<Long, Integer>() {
-                            @Override
-                            public Integer apply(Long aLong) {
-                                return aLong.intValue() * 2 + 1;
-                            }
-                        }))
+                        Observable.interval(0, 2, TimeUnit.MINUTES)
+                                .take(3)
+                                .map(new Function<Long, Integer>() {
+                                    @Override
+                                    public Integer apply(Long aLong) {
+                                        return aLong.intValue() * 2;
+                                    }
+                                }),
+                        Observable.interval(1, 2, TimeUnit.MINUTES)
+                                .take(3)
+                                .map(new Function<Long, Integer>() {
+                                    @Override
+                                    public Integer apply(Long aLong) {
+                                        return aLong.intValue() * 2 + 1;
+                                    }
+                                }))
                 .test();
 
         mTestScheduler.advanceTimeBy(6, TimeUnit.MINUTES);
@@ -162,5 +162,4 @@ public class RxCombiningTrainingTest {
         testObserver.assertNoErrors();
         testObserver.assertComplete();
     }
-
 }
